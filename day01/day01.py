@@ -1,20 +1,20 @@
 #!/usr/bin/python3
 
 def countDepthMessurementIncreases(values):
-  ret = 0
-  old = None
-  for v in values:
-    if old != None and v > old:
-      ret += 1
-    old = v
-  return ret
+  count = 0
+  last = None
+  for value in values:
+    if last != None and value > last:
+      count += 1
+    last = value
+  return count
 
 def groupValsInGroupsOf3(values):
-  grouped = []
+  group = []
   for i in range(len(values)-2):
-    grouped.append(values[i]+values[i+1]+values[i+2])
+    group.append(values[i]+values[i+1]+values[i+2])
     
-  return grouped
+  return group
 
 
 lines = open("day01.dat", "r").read().splitlines()
