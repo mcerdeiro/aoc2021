@@ -1,6 +1,4 @@
 #!/usr/bin/python3
-import itertools
-from functools import reduce 
 
 def countDepthMessurementIncreases(values):
   ret = 0
