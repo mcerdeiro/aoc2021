@@ -20,7 +20,7 @@ def groupValsInGroupsOf3(values):
 lines = open("day01.dat", "r").read().splitlines()
 vals = [int(x) for x in lines]
 
-print("Part2:", countDepthMessurementIncreases(vals))
+print("Part1:", countDepthMessurementIncreases(vals))
 print("Part2:", countDepthMessurementIncreases(groupValsInGroupsOf3(vals)))
   
   
