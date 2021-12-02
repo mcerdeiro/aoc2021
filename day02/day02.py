@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 lines = open("day02.dat", "r").read().splitlines()
-#lines = [int(x) for x in lines]
 
 def mulHorizontalAndDepthPosition(movements):
   pos = (0, 0)
