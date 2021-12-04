@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+
 import copy
 
 p1 = 0
