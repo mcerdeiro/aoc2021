@@ -16,8 +16,8 @@ def fuelCostPart1(val):
 mini = min(vals)
 maxi = max(vals)
 
-minFuelPart1 = 10000000000000000
-minFuelPart2 = 10000000000000000
+minFuelPart1 = 10e9
+minFuelPart2 = 10e9
 
 for check in range(mini,maxi):
   fuelPart1 = 0
