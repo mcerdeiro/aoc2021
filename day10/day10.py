@@ -36,7 +36,7 @@ P2 = {
  
 p1 = 0
 p2 = 0
-VALS = []
+VALS = set()
 
 for line in lines:
   i, L = findFirstIlegalCharacter(line)
@@ -48,16 +48,11 @@ for line in lines:
       score *= 5
       score += P2[convert[l]]
   
-  VALS.append(score)
+  VALS.add(score)
 
 print("Part 1:", p1)
 
+VALS = list(VALS)
 VALS.sort()
-old = 0
-WITHOUTDUP = []
-for i,v in enumerate(VALS):
-  if v != old:
-    WITHOUTDUP.append(v)
-  old = v
 
-print("Part 2:", WITHOUTDUP[len(WITHOUTDUP)//2])
+print("Part 2:", VALS[len(VALS)//2])
