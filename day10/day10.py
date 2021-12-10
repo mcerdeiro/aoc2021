@@ -36,7 +36,7 @@ P2 = {
  
 p1 = 0
 p2 = 0
-VALS = set()
+VALS = []
 
 for line in lines:
   i, L = findFirstIlegalCharacter(line)
@@ -48,11 +48,9 @@ for line in lines:
       score *= 5
       score += P2[convert[l]]
   
-  VALS.add(score)
+    VALS.append(score)
 
 print("Part 1:", p1)
 
-VALS = list(VALS)
 VALS.sort()
-
 print("Part 2:", VALS[len(VALS)//2])
