@@ -46,7 +46,7 @@ def getWithoutAnyOf(vals, without):
 
 def getNumbers(vals):
   D = {}
-  a,b,c,d,e,f,g = "", "", "", "", "", "", ""
+  c,f = "", ""
 
   for v in vals:
     if len(v) == 2:

@@ -4,14 +4,15 @@ from typing import List
 import sys
 
 lines = open(sys.argv[1] if len(sys.argv) > 1 else "day10.dat", "r").read().splitlines()
+
 convert = { "<": ">", "(": ")", "[": "]", "{": "}"}
 
 def findFirstIlegalCharacter(line):
   LIST = []  
   for c in line:
-    if c in ["<", "[", "{", "("]:
+    if c in convert.keys():
       LIST.append(c)
-    elif c in [">", "]", "}", ")"]:
+    elif c in convert.values():
       l = LIST.pop()
       if convert[l] != c:
         return c, LIST

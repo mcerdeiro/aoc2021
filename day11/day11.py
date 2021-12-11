@@ -7,12 +7,12 @@ lines = open(sys.argv[1] if len(sys.argv) > 1 else "day11.dat", "r").read().spli
 
 O = {}
 
-def getNei(x,y):
+def getNei(p):
   nei = []
   for x1  in [-1, 0, 1]:
     for y1 in [-1, 0, 1]:
-      if 0<=x+x1<len(lines[0]) and 0<=y+y1<len(lines) and (x1 != 0 or y1 != 0):
-        nei.append((x+x1,y+y1))
+      if 0<=p[0]+x1<len(lines[0]) and 0<=p[1]+y1<len(lines) and (x1,y1) != (0,0):
+        nei.append((p[0]+x1,p[1]+y1))
   return nei
 
 
@@ -37,14 +37,14 @@ for i in range(100000):
         if (x,y) not in F:
           F.add((x,y))
           p1 += 1
-          TOINC = getNei(x,y)
+          TOINC = getNei((x,y))
           while len(TOINC):
             p = TOINC.pop()
             O[p] += 1
             if O[p] > 9 and p not in F:
               F.add(p)
               p1 += 1
-              TOINC += getNei(p[0],p[1])
+              TOINC += getNei(p)
 
   for p in F:
     O[p] = 0
