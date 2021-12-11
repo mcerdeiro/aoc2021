@@ -9,14 +9,10 @@ O = {}
 
 def getNei(x,y):
   nei = []
-  nei.append((x-1,y)) if x > 0 else 0
-  nei.append((x,y-1)) if y > 0 else 0
-  nei.append((x+1,y)) if x < len(lines[0])-1 else 0
-  nei.append((x,y+1)) if y < len(lines)-1 else 0
-  nei.append((x-1,y-1)) if x > 0 and y > 0 else 0
-  nei.append((x+1,y+1)) if x < len(lines[0])-1 and y < len(lines)-1 else 0
-  nei.append((x+1,y-1)) if x < len(lines[0])-1 and y > 0 else 0
-  nei.append((x-1,y+1)) if x > 0 and y < len(lines)-1 else 0
+  for x1  in [-1, 0, 1]:
+    for y1 in [-1, 0, 1]:
+      if 0<=x+x1<len(lines[0]) and 0<=y+y1<len(lines) and (x1 != 0 or y1 != 0):
+        nei.append((x+x1,y+y1))
   return nei
 
 
