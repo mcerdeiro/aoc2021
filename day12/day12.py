@@ -9,61 +9,116 @@ lines = open(sys.argv[1] if len(sys.argv) > 1 else "day12.dat", "r").read().spli
 C = {}
 for line in lines:
   fr,to = line.split("-")
-  if fr in C.keys():
-    C[fr] += [to]
-  else:
-    C[fr] = [to]
-  if to in C.keys():
-    C[to] += [fr]
-  else:
-    C[to] = [fr]
-    
-def getLows(path):
-  lows = defaultdict(int)
-  for p in path:
-    if p.islower():
-      lows[p] += 1
-  return lows
+  if to != "start":
+    if fr in C.keys():
+      C[fr] += [to]
+    else:
+      C[fr] = [to]
+  if fr != "start":
+    if to in C.keys():
+      C[to] += [fr]
+    else:
+      C[to] = [fr]
 
-def isValidCombinationPart1(path):
-  lows = getLows(path)
-  if list(lows.values()).count(2) > 0:
-    return False
-  return True
-  
-  
-def isValidCombinationPart2(path):
-  lows = getLows(path)
+for k,vals in C.items():
+  if k.islower():
+    newvals = []
+    for v in vals:
+      if v.islower():
+        newvals.append(v)
+      else:
+        for v2 in C[v]:
+          newvals.append(v2)
+        
+    C[k] = newvals
+        
 
-  if list(lows.values()).count(3) == 1:
-    return False
-  if list(lows.values()).count(2) == 2:
-    return False
-  if lows["start"] > 1:
-    return False
+
+def isValidCombinationPart1(path, current):
+  if current.isupper():
+    return True
+  if path.count(current) == 0:
+    return True
   
+  return False
+  
+  
+def isValidCombinationPart2(path, current, smallCaveTwice = False):
+  if current.islower():    
+    if current == "start":
+      return False
+
+    countCurrent = path.count(current)
+    if smallCaveTwice:
+      if countCurrent >= 1:
+        return False
+    else:
+      if countCurrent >= 2:
+        return False  
   return True
   
 p1 = 0
 p2 = 0
 
-def findPathsPart(current):
+def findPathsPart1(current):
+  global p1
+
+  if current[-1] == "end":
+    p1 += 1
+    return
+
+  options = C[current[-1]]
+  for opt in options:
+    if isValidCombinationPart1(current, opt):
+      new = copy.deepcopy(current)
+      new.append(opt)
+      findPathsPart1(new)
+
+def findPathsPart2(current, smallCaveTwice = False):
   global p1, p2
 
   if current[-1] == "end":
-    if isValidCombinationPart1(current):
-      p1 += 1
     p2 += 1
     return
 
   options = C[current[-1]]
   for opt in options:
-    new = copy.deepcopy(current)
-    new.append(opt)
-    if (isValidCombinationPart2(new)):
-      findPathsPart(new)
+    if (isValidCombinationPart2(current, opt, smallCaveTwice)):
+      followSmallCaveTwice = smallCaveTwice
+      if followSmallCaveTwice == False:
+        if opt.islower():
+          if current.count(opt) == 1:
+            followSmallCaveTwice = True
+      new = copy.deepcopy(current)
+      new.append(opt)
+      findPathsPart2(new, followSmallCaveTwice)
 
 
-findPathsPart(["start"])
+findPathsPart1(["start"])
 print("Part1:", p1)
-print("Part2:", p2)
+# findPathsPart2(["start"])
+# print("Part2:", p2)
+
+p2 = 0
+def findPathsPart2_2(path: set(), last: str,  alreadyInSmallCaveTwice: bool = False):
+  global p2
+  
+  options = C[last]
+  for opt in options:
+    if opt.isupper():
+      findPathsPart2_2(path, opt, alreadyInSmallCaveTwice)
+    else:
+      if opt == "end":
+        p2 += 1
+      else:
+        if opt in path:
+          if not alreadyInSmallCaveTwice:
+            findPathsPart2_2(path, opt, True)
+        else:
+          newpath = set(path)
+          newpath.add(opt)
+          findPathsPart2_2(newpath, opt, alreadyInSmallCaveTwice)
+  
+
+findPathsPart2_2(set(), "start", False)
+print("Optimized Part2:", p2)
