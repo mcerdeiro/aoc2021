@@ -94,14 +94,15 @@ def findPathsPart2(current, smallCaveTwice = False):
       findPathsPart2(new, followSmallCaveTwice)
 
 
-findPathsPart1(["start"])
-print("Part1:", p1)
+# findPathsPart1(["start"])
+# print("Part1:", p1)
 # findPathsPart2(["start"])
 # print("Part2:", p2)
 
+p1 = 0
 p2 = 0
 def findPathsPart2_2(path: set(), last: str,  alreadyInSmallCaveTwice: bool = False):
-  global p2
+  global p1,p2
   
   options = C[last]
   for opt in options:
@@ -110,6 +111,8 @@ def findPathsPart2_2(path: set(), last: str,  alreadyInSmallCaveTwice: bool = Fa
     else:
       if opt == "end":
         p2 += 1
+        if alreadyInSmallCaveTwice == False:
+          p1 += 1
       else:
         if opt in path:
           if not alreadyInSmallCaveTwice:
@@ -121,4 +124,5 @@ def findPathsPart2_2(path: set(), last: str,  alreadyInSmallCaveTwice: bool = Fa
   
 
 findPathsPart2_2(set(), "start", False)
-print("Optimized Part2:", p2)
+print("Part1:", p1)
+print("Part2:", p2)
