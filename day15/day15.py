@@ -24,11 +24,9 @@ def getNei(p):
   ret.append((p[0]+1,p[1])) if p[0] < X-1 else 0
   ret.append((p[0],p[1]+1)) if p[1] < Y-1 else 0
   return ret
-    
+
 def solve():
   pos = (0,0)
-  price = 0
-
   V = {pos: 0}
   tovisit = getNei(pos)
   TOVISIT = []
@@ -51,7 +49,7 @@ def solve():
       tovisit = getNei(current[1])
       for tv in tovisit:
         heapq.heappush(TOVISIT, (V[current[1]]+M[tv], tv))
-            
+
   return V[(X-1,Y-1)]
     
 
@@ -69,4 +67,3 @@ for muly in range(5):
 X = X*5
 Y = Y*5
 print("Part2", solve())
-
