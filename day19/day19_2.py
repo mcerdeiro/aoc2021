@@ -56,6 +56,42 @@ def getRotations_old(bacon):
 
   return ret
 
+def getRotations_new2(bacon):
+  ret = []
+  x,y,z = bacon
+  ret.append((x,y,z))
+  ret.append((x,-y,-z))
+  ret.append((x,z,-y))
+  ret.append((x,-z,y))
+  
+  ret.append((-x,y,z))
+  ret.append((-x,-y,-z))
+  ret.append((-x,z,-y))
+  ret.append((-x,-z,y))
+  
+  ret.append((x,y,z))
+  ret.append((-x,-y,z))
+  ret.append((y,-x,z))
+  ret.append((-y,x,z))
+  
+  ret.append((x,y,-z))
+  ret.append((-x,-y,-z))
+  ret.append((-y,x,-z))
+  ret.append((y,-x,-z))
+  
+  ret.append((x,y,z))
+  ret.append((-x,y,-z))
+  ret.append((z,y,-x))
+  ret.append((-z,y,x))
+  
+  ret.append((x,-y,z))
+  ret.append((-x,-y,-z))
+  ret.append((-z,-y,x))
+  ret.append((z,-y,-x))
+
+  assert(len(ret)==24)
+  return ret
+
 def getRotations_new(bacon):
   ret = []
   for ax in [1, -1]:
@@ -111,7 +147,7 @@ def parseScanners(lines):
 def move(overlap, ri, ref):
   ret = []
   for p in overlap:
-    assert(len(p)==24)
+    assert(len(p)==64)
     assert(len(ref)==3)
     x = p[ri][0]-ref[0]
     y = p[ri][1]-ref[1]
@@ -150,36 +186,39 @@ def foundOverlap(ref, overlap):
           if t in ref:
             match += 1
         if match >= 12:
-          return trans
+          return trans, (-offx, -offy, -offz)
     
-  return None
+  return None, None
 
 S = parseScanners(lines)
 S = scannersWithRotations(S)
+
 
 FOUNDS = [0]
 NOTFOUNDS = [x for x in range(1, len(S))]
 BOARD = getRotPoints(S[0], 0)
 TRANSFORMED = {0: getRotPoints(S[0], 0)}
+SPOS = [(0,0,0)]
 
 print("Found", FOUNDS, "notfound", NOTFOUNDS)
 I = set()
 
 while len(NOTFOUNDS) != 0:
-  print("Still not found", NOTFOUNDS)
+  print("Still not found", NOTFOUNDS, I)
   NEWFOUNDS = FOUNDS.copy()
   NEWNOTFOUNDS = NOTFOUNDS.copy()
   found = False
   for f in FOUNDS:
     for nf in NOTFOUNDS:
-      if (f,nf) in I:
-        break
       print("Checking", f, nf)
-      transformed = foundOverlap(TRANSFORMED[f], S[nf])
+      if (f,nf) in I:
+        continue
+      transformed, scanpos = foundOverlap(TRANSFORMED[f], S[nf])
       if transformed == None:
-        #I.add((f,nf))
+        I.add((f,nf))
         pass
       else:
+        SPOS.append(scanpos)
         NEWFOUNDS.insert(0, nf)
         NEWNOTFOUNDS.remove(nf)
         oldlen = len(BOARD)
@@ -221,3 +260,16 @@ while len(NOTFOUNDS) != 0:
     #exit()
     
 print("Part1:", len(BOARD))
+print(SPOS)
+
+
+def manDistance(p1, p2):
+  return abs(p1[0]-p2[0]) + abs(p1[1]-p2[1]) + abs(p1[2]-p2[2])
+
+maxD = 0
+for i in range(len(SPOS)):
+  for j in range(len(SPOS)):
+    if i != j:
+      maxD = max(maxD, manDistance(SPOS[i], SPOS[j]))
+      
+print("Part2", maxD)
