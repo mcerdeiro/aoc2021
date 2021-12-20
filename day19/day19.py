@@ -5,42 +5,15 @@ from typing import DefaultDict, List
 import sys
 from collections import defaultdict
 import heapq
+from multiprocessing import Pool
 
 lines = open(sys.argv[1] if len(sys.argv) > 1 else "day19.dat", "r").read().splitlines()
 
-S = []
-nextScanner = None
+lines2= open("res.dat", "r").read().splitlines()
+RES = []
+for l in lines2:
+  RES.append(tuple(int(x) for x  in l.split(",")))
 
-def getrotations(bacon):
-  ret = []
-  for ax in [1, -1]:
-    for ay in [1, -1]:
-      for az in [1, -1]:
-        x = bacon[0] * ax
-        y = bacon[1] * ay
-        z = bacon[2] * az
-        
-        ret.append((x,y,z))
-    
-  ret2 = []
-  for r in ret:
-    for rot in [0, 1,2]:
-      x,y,z = r
-      if rot == 0:
-        ret2.append((x,y,z))
-      elif rot == 1:
-        ret2.append((y,z, x))
-      elif rot == 2:
-        ret2.append((z, x, y))
-
-  assert(len(set(ret2))==24)
-  return ret2
-
-#R = getrotations((1,2,3))
-#print(len(R), len(set(R)), R)
-
-        
-        
 
 def rotationangle(bacon, pitch, roll, yaw):
   cosa = [1, 0, -1, 0][yaw] # cos 0, 90, 180, 270 = 1, 0, -1, 0
@@ -70,163 +43,188 @@ def rotationangle(bacon, pitch, roll, yaw):
   z = Azx*px + Azy*py + Azz*pz
   
   return (x,y,z)
-  
-def getAllRotations(bacon):
+   
+def getRotations(bacon):
   ret = []
-  for pitch in range(4):
-    for roll in range(4):
+
+  for roll in range(2):
       for yaw in range(4):
-        ret.append(rotationangle(bacon, pitch, roll, yaw))
+        for pitch in range(4):
+          ret.append(rotationangle(bacon, pitch, roll, yaw))
 
   return ret
 
-def rotationsNotUSe(bacon):
-  XA = [(1, 1, 1, 1), (0, 0, 0, 0), (0, 0, 0, 0)]
-  YA = [(0, 0, 0, 0), (1, 0, -1, 0), (0, -1, 0, 1)]
-  ZA = [(0, 0, 0, 0), (0, 1, 0, -1), (1, 0, -1, 0)]
-  R = []
-  for xa in range(4):
-    x = XA[0][xa] * bacon[0] + XA[1][xa] * bacon[1] + XA[2][xa] * bacon[2]
-    y = YA[0][xa] * bacon[0] + YA[1][xa] * bacon[1] + YA[2][xa] * bacon[2]
-    z = ZA[0][xa] * bacon[0] + ZA[1][xa] * bacon[1] + ZA[2][xa] * bacon[2]
-    R.append((x,y,z))
+def scannersWithRotations(S):
+  ret = []
   
-  XA = [(1, 0, -1, 0), (0, 0, 0, 0), (0, -1, 0, 1)]
-  YA = [(0, 0, 0, 0), (1, 1, 1, 1), (0, 0, 0, 0)]
-  ZA = [(0, 1, 0, -1), (0, 0, 0, 0), (1, 0, -1, 0)]
-  R2 = []
-  for r in R:
-    for ya in range(4):
-      x = XA[0][ya] * r[0] + XA[1][ya] * r[1] + XA[2][ya] * r[2]
-      y = YA[0][ya] * r[0] + YA[1][ya] * r[1] + YA[2][ya] * r[2]
-      z = ZA[0][ya] * r[0] + ZA[1][ya] * r[1] + ZA[2][ya] * r[2]
-      #if (x,y,z) not in R2:
-      R2.append((x,y,z))
+  for s in S:
+    tmp = []
+    for b in s:
+      tmp.append(getRotations(b))
+    ret.append(tmp)
+  
+  return ret
 
-  XA = [(1, 0, -1, 0), (0, -1, 0, 1), (0, 0, 0, 0)]
-  YA = [(0, 1, 0, -1), (1, 0, -1, 0), (0, 0, 0, 0)]
-  ZA = [(0, 0, 0, 0), (0, 0, 0, 0), (1, 1, 1, 1)]
-  R3 = []
-  for r in R2:
-    for za in range(4):
-      x = XA[0][za] * r[0] + XA[1][za] * r[1] + XA[2][za] * r[2]
-      y = YA[0][za] * r[0] + YA[1][za] * r[1] + YA[2][za] * r[2]
-      z = ZA[0][za] * r[0] + ZA[1][za] * r[1] + ZA[2][za] * r[2]
-      #if (x,y,z) not in R3:
-      R3.append((x,y,z))
-        
-  return R3
-
-for line in lines:
-  if "---" in line:
-    print(line)
-    nextScanner = []
-  else:
-    if line == "":
-      S.append(nextScanner)
+def parseScanners(lines):
+  S = []
+  tmp = []
+  for line in lines:
+    if "---" in line:
+      print(line)
+    elif line == "":
+      S.append(tmp)
+      print("Len", len(tmp))
+      tmp = []
     else:
       x,y,z = [int(x) for x in line.split(",")]
-      nextScanner.append((x,y,z))
-S.append(nextScanner)
-
-def findPos(BOARD, bacons):
-  B = []
-  for b in bacons:
-    rots = getrotations(b)
-    B.append(rots)
+      tmp.append((x,y,z))
   
-  maxMatch = -10e9
-  maxMatchi = None
-  offxfinal = None
-  offyfinal = None
-  offzfinal = None
+  if len(tmp) != 0:
+    S.append(tmp)
+    print("Len", len(tmp))
+  
+  return S
 
-  for i in range(len(B[0])):
-    for baconinboard in BOARD:
-      for bi in range(len(B)):
-        #print("Maxing", baconinboard, "with", B[bi][i])
-        offx = baconinboard[0] - B[bi][i][0]
-        offy = baconinboard[1] - B[bi][i][1]
-        offz = baconinboard[2] - B[bi][i][2]
-        
-        TOMATCH = []
-        for bi2 in range(len(B)):
-          TOMATCH.append(B[bi2][i])
-        
+def move(overlap, ri, ref):
+  ret = []
+  for p in overlap:
+    assert(len(p)==32)
+    assert(len(ref)==3)
+    x = p[ri][0]-ref[0]
+    y = p[ri][1]-ref[1]
+    z = p[ri][2]-ref[2]
+    ret.append((x,y,z))
+  return ret
+
+
+def getRotPoints(points, rotindex):
+  ret = []
+  for p in points:
+    ret.append(p[rotindex])
+  return ret
+
+def translate(points, translation):
+  ret = []
+  for p in points:
+    x = p[0] - translation[0]
+    y = p[1] - translation[1]
+    z = p[2] - translation[2]
+    ret.append((x,y,z))
+  return ret
+
+def foundOverlap(ref, overlap):
+  assert(len(overlap[0])==32)
+  for rotindex in range(len(overlap[0])):
+    rotpoints = getRotPoints(overlap, rotindex)
+    for r1 in ref:
+      for r2 in rotpoints:
+        offx = r2[0] - r1[0]
+        offy = r2[1] - r1[1]
+        offz = r2[2] - r1[2]
+        trans = translate(rotpoints, (offx, offy, offz))
         match = 0
-        for baconinboard2 in BOARD:
-          x = baconinboard2[0] - offx
-          y = baconinboard2[1] - offy
-          z = baconinboard2[2] - offz
-          
-          if (x,y,z) in TOMATCH:
+        for t in trans:
+          if t in ref:
             match += 1
+        if match >= 12:
+          return trans, (-offx, -offy, -offz)
+    
+  return None, None
 
-        assert(match >= 1)
-        
-        if match > maxMatch:
-          maxMatch = match
-          maxMatchi = i
-          offxfinal = offx
-          offyfinal = offy
-          offzfinal = offz
+S = parseScanners(lines)
+S = scannersWithRotations(S)
 
-  #assert(maxMatch >= 12)
-  print("Matching", maxMatch)
-  if maxMatch < 12:
-    return None
+
+FOUNDS = [0]
+NOTFOUNDS = [x for x in range(1, len(S))]
+BOARD = getRotPoints(S[0], 0)
+TRANSFORMED = {0: getRotPoints(S[0], 0)}
+SPOS = [(0,0,0)]
+
+print("Found", FOUNDS, "notfound", NOTFOUNDS)
+I = set()
+
+def checkParallel(input):
+  global TRANSFORMED, S, I
+  f = input[0]
+  nf = input[1]
+  if (f,nf) in I:
+        return None, None
+
+  print("Checking", f, nf)
+  assert(f in TRANSFORMED.keys())
+  transformed, scanpos = foundOverlap(TRANSFORMED[f], S[nf])
+  return transformed, scanpos
+
+while len(NOTFOUNDS) != 0:
+  print("Still not found", NOTFOUNDS, I)
   
-  TRANSFORMED = []
-  for bi2 in range(len(B)):
-    x = B[bi2][maxMatchi][0] + offxfinal
-    y = B[bi2][maxMatchi][1] + offyfinal
-    z = B[bi2][maxMatchi][2] + offzfinal
-    TRANSFORMED.append((x,y,z))
+  PINPUT = []
+  # for f in FOUNDS:
+  #   PINPUT = [(f, nf) for nf in NOTFOUNDS]
+  
+  PROCESSORS = 8
+  offi = 0
+  offj = 0
+  incf = True
+  print("FOUND", FOUNDS)
+  print("NOTFOUND", NOTFOUNDS)
+  for j in range(min(len(NOTFOUNDS), PROCESSORS//2)):
+    for i in range(min(len(FOUNDS), PROCESSORS//2)):
+      f = FOUNDS[(i+offi) % len(FOUNDS)] 
+      nf = NOTFOUNDS[(j+offj) % len(NOTFOUNDS)]
+      while (f,nf) in I:
+        f = FOUNDS[(i+offi) % len(FOUNDS)] 
+        nf = NOTFOUNDS[(j+offj) % len(NOTFOUNDS)]
+        if incf:
+          offi += 1
+          incf = False
+        else:
+          offj += 1
+          incf = True
+      if (f, nf) not in PINPUT:
+        PINPUT.append((f, nf))
+  
+  print("Toprocess", PINPUT)
+  res = []  
+  with Pool(PROCESSORS) as pools:
+    res = pools.map(checkParallel, PINPUT)
 
-  #print("Relative", maxMatchi, offxfinal, offyfinal, offzfinal)
-  return TRANSFORMED
+  #for nf in NOTFOUNDS:
+    # if (f,nf) in I:
+    #   continue
+    # print("Checking", f, nf)
+    # transformed, scanpos = foundOverlap(TRANSFORMED[f], S[nf])
+  for i,r in enumerate(res):
+    transformed, scanpos = r
+    f = PINPUT[i][0]
+    nf = PINPUT[i][1]
+    if transformed == None:
+      I.add((f,nf))
+      pass
+    else:
+      SPOS.append(scanpos)
+      FOUNDS.append(nf)
+      if nf in NOTFOUNDS:
+        NOTFOUNDS.remove(nf)
+      oldlen = len(BOARD)
+      for t in transformed:
+        if t not in BOARD:
+          BOARD.append(t)
+      TRANSFORMED[nf] = transformed.copy()
+      print("Oldlen", oldlen, "newlen", len(BOARD), len(transformed))
+    
+print("Part1:", len(BOARD))
+print(SPOS)
 
-B = S[0]
 
-TRULE = {}
-MATCHED = [0]
+def manDistance(p1, p2):
+  return abs(p1[0]-p2[0]) + abs(p1[1]-p2[1]) + abs(p1[2]-p2[2])
 
-while(len(MATCHED) != 4):
-  for i in range(len(S)):
-    for j in range(len(S)):
-      if j != i:
-        print("Checking", i, j)
-        if i in MATCHED and j not in MATCHED:
-          TRANS = findPos(S[i], S[j])
-          if TRANS != None:
-            S[j] = TRANS
-            MATCHED.append(j)
-            for t in TRANS:
-              if t not in B:
-                B.append(t)
-            print("Sensor", i, "matches", j, MATCHED)
-
-
-print(MATCHED)
-print("Part1", len(B))  
-
-# while (len(MATCHED) != 5):
-#   for i in range(len(S)):
-#     for j in range(i+1, len(S)):
-#       print("Checking", i, j)
-#       if i != j:
-#         newPos, matchi, offx, offy, offz = findPos(S[i], S[j])
-#         if newPos != None:
-#           if i in MATCHED:
-#             if j not in MATCHED:
-#               print("Sensor", i, "matches", j)
-#               #print("S[j]", S[j])
-#               #print("newPos", newPos)
-#               S[j] = newPos
-#               MATCHED.append(j)
-#               for np in newPos:
-#                 if np not in B:
-#                   B.append(np)
-
-# print(MATCHED)
-# print("Part1", len(B))
+maxD = 0
+for i in range(len(SPOS)):
+  for j in range(len(SPOS)):
+    if i != j:
+      maxD = max(maxD, manDistance(SPOS[i], SPOS[j]))
+      
+print("Part2", maxD)
