@@ -49,10 +49,20 @@ def getRotations(bacon):
 
 def getRotations_old(bacon):
   ret = []
-  for pitch in range(4):
-    for roll in range(4):
+
+  for roll in range(2):
+    if roll == 0:
       for yaw in range(4):
-        ret.append(rotationangle(bacon, pitch, roll, yaw))
+        for pitch in range(4):
+          ret.append(rotationangle(bacon, pitch, roll, yaw))
+    if roll == 1:
+      for yaw in range(4):
+        for pitch in range(2):
+          ret.append(rotationangle(bacon, pitch, roll, yaw))
+    
+  
+  
+  
 
   return ret
 
@@ -110,7 +120,7 @@ def getRotations_new(bacon):
     ret2.append((y,z, x))
     ret2.append((z, x, y))
 
-  assert(len(set(ret2))==64)
+  assert(len(set(ret2))==24)
   return ret2
 
 def scannersWithRotations(S):
@@ -147,7 +157,7 @@ def parseScanners(lines):
 def move(overlap, ri, ref):
   ret = []
   for p in overlap:
-    assert(len(p)==64)
+    assert(len(p)==24)
     assert(len(ref)==3)
     x = p[ri][0]-ref[0]
     y = p[ri][1]-ref[1]
@@ -172,7 +182,7 @@ def translate(points, translation):
   return ret
 
 def foundOverlap(ref, overlap):
-  assert(len(overlap[0])==64)
+  assert(len(overlap[0])==24)
   for rotindex in range(len(overlap[0])):
     rotpoints = getRotPoints(overlap, rotindex)
     for r1 in ref:
