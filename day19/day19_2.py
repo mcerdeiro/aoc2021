@@ -5,6 +5,7 @@ from typing import DefaultDict, List
 import sys
 from collections import defaultdict
 import heapq
+from multiprocessing import Pool
 
 lines = open(sys.argv[1] if len(sys.argv) > 1 else "day19.dat", "r").read().splitlines()
 
@@ -143,61 +144,49 @@ SPOS = [(0,0,0)]
 print("Found", FOUNDS, "notfound", NOTFOUNDS)
 I = set()
 
+def checkParallel(input):
+  global TRANSFORMED, S, I
+  f = input[0]
+  nf = input[1]
+  if (f,nf) in I:
+        return None, None
+
+  print("Checking", f, nf)
+  assert(f in TRANSFORMED.keys())
+  transformed, scanpos = foundOverlap(TRANSFORMED[f], S[nf])
+  return transformed, scanpos
+
 while len(NOTFOUNDS) != 0:
   print("Still not found", NOTFOUNDS, I)
-  NEWFOUNDS = FOUNDS.copy()
-  NEWNOTFOUNDS = NOTFOUNDS.copy()
-  found = False
+  
+  PINPUT = []
   for f in FOUNDS:
-    for nf in NOTFOUNDS:
-      print("Checking", f, nf)
-      if (f,nf) in I:
-        continue
-      transformed, scanpos = foundOverlap(TRANSFORMED[f], S[nf])
+    PINPUT = [(f, nf) for nf in NOTFOUNDS]
+    ret = []
+    with Pool(8) as pools:
+      res = pools.map(checkParallel, PINPUT)
+    #for nf in NOTFOUNDS:
+      # if (f,nf) in I:
+      #   continue
+      # print("Checking", f, nf)
+      # transformed, scanpos = foundOverlap(TRANSFORMED[f], S[nf])
+    for i,r in enumerate(res):
+      transformed, scanpos = r
+      f = PINPUT[i][0]
+      nf = PINPUT[i][1]
       if transformed == None:
         I.add((f,nf))
         pass
       else:
         SPOS.append(scanpos)
-        NEWFOUNDS.insert(0, nf)
-        NEWNOTFOUNDS.remove(nf)
+        FOUNDS.insert(0, nf)
+        NOTFOUNDS.remove(nf)
         oldlen = len(BOARD)
         for t in transformed:
           if t not in BOARD:
             BOARD.append(t)
-        TRANSFORMED[nf] = transformed
-        print("FOUND", f, nf)
+        TRANSFORMED[nf] = transformed.copy()
         print("Oldlen", oldlen, "newlen", len(BOARD), len(transformed))
-        found = True
-        break
-    if found:
-      break
-  FOUNDS = NEWFOUNDS
-  NOTFOUNDS = NEWNOTFOUNDS
-  # if len(FOUNDS) == 4:
-  #   print("LENTRANS", len(TRANSFORMED))
-  #   print("LENBOARD", len(BOARD))
-  #   print(TRANSFORMED)
-  #   print("FOUND")
-  #   founded = 0
-  #   for b in BOARD:
-  #     if b in RES:
-  #       print(b)
-  #       founded += 1
-  #   print("FOUNDED", founded)
-  #   print("NOTFOUND")
-  #   notfound = 0
-  #   for b in BOARD:
-  #     if b not in RES:
-  #       notfound += 1
-  #       print(b)
-  #   print("NOT FOUND", notfound)
-  #   for i in range(24):
-  #     rot = move(S[2], i, (-1105,1205,-1229))
-  #     print("ROTATE", i)
-  #     for j, r in enumerate(rot):
-  #       print(r, S[2][j][i])
-    #exit()
     
 print("Part1:", len(BOARD))
 print(SPOS)
