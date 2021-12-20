@@ -42,86 +42,16 @@ def rotationangle(bacon, pitch, roll, yaw):
   z = Azx*px + Azy*py + Azz*pz
   
   return (x,y,z)
-  
-  
+   
 def getRotations(bacon):
-  return getRotations_old(bacon)
-
-def getRotations_old(bacon):
   ret = []
 
   for roll in range(2):
-    if roll == 0:
       for yaw in range(4):
         for pitch in range(4):
           ret.append(rotationangle(bacon, pitch, roll, yaw))
-    if roll == 1:
-      for yaw in range(4):
-        for pitch in range(2):
-          ret.append(rotationangle(bacon, pitch, roll, yaw))
-    
-  
-  
-  
 
   return ret
-
-def getRotations_new2(bacon):
-  ret = []
-  x,y,z = bacon
-  ret.append((x,y,z))
-  ret.append((x,-y,-z))
-  ret.append((x,z,-y))
-  ret.append((x,-z,y))
-  
-  ret.append((-x,y,z))
-  ret.append((-x,-y,-z))
-  ret.append((-x,z,-y))
-  ret.append((-x,-z,y))
-  
-  ret.append((x,y,z))
-  ret.append((-x,-y,z))
-  ret.append((y,-x,z))
-  ret.append((-y,x,z))
-  
-  ret.append((x,y,-z))
-  ret.append((-x,-y,-z))
-  ret.append((-y,x,-z))
-  ret.append((y,-x,-z))
-  
-  ret.append((x,y,z))
-  ret.append((-x,y,-z))
-  ret.append((z,y,-x))
-  ret.append((-z,y,x))
-  
-  ret.append((x,-y,z))
-  ret.append((-x,-y,-z))
-  ret.append((-z,-y,x))
-  ret.append((z,-y,-x))
-
-  assert(len(ret)==24)
-  return ret
-
-def getRotations_new(bacon):
-  ret = []
-  for ax in [1, -1]:
-    for ay in [1, -1]:
-      for az in [1, -1]:
-        x = bacon[0] * ax
-        y = bacon[1] * ay
-        z = bacon[2] * az
-        
-        ret.append((x,y,z))
-    
-  ret2 = []
-  for r in ret:
-    x,y,z = r
-    ret2.append((x,y,z))
-    ret2.append((y,z, x))
-    ret2.append((z, x, y))
-
-  assert(len(set(ret2))==24)
-  return ret2
 
 def scannersWithRotations(S):
   ret = []
@@ -157,7 +87,7 @@ def parseScanners(lines):
 def move(overlap, ri, ref):
   ret = []
   for p in overlap:
-    assert(len(p)==24)
+    assert(len(p)==32)
     assert(len(ref)==3)
     x = p[ri][0]-ref[0]
     y = p[ri][1]-ref[1]
@@ -182,7 +112,7 @@ def translate(points, translation):
   return ret
 
 def foundOverlap(ref, overlap):
-  assert(len(overlap[0])==24)
+  assert(len(overlap[0])==32)
   for rotindex in range(len(overlap[0])):
     rotpoints = getRotPoints(overlap, rotindex)
     for r1 in ref:
