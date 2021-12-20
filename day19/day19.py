@@ -154,9 +154,6 @@ while len(NOTFOUNDS) != 0:
   print("Still not found", NOTFOUNDS)
   
   PINPUT = []
-  # for f in FOUNDS:
-  #   PINPUT = [(f, nf) for nf in NOTFOUNDS]
-  
   PROCESSORS = 8
   offi = 0
   offj = 0
@@ -182,11 +179,6 @@ while len(NOTFOUNDS) != 0:
   with Pool(PROCESSORS) as pools:
     res = pools.map(checkParallel, PINPUT)
 
-  #for nf in NOTFOUNDS:
-    # if (f,nf) in I:
-    #   continue
-    # print("Checking", f, nf)
-    # transformed, scanpos = foundOverlap(TRANSFORMED[f], S[nf])
   for i,r in enumerate(res):
     transformed, scanpos = r
     f = PINPUT[i][0]
