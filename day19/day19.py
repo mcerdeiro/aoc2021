@@ -50,7 +50,9 @@ def getRotations(bacon):
   for roll in range(2):
       for yaw in range(4):
         for pitch in range(4):
-          ret.append(rotationangle(bacon, pitch, roll, yaw))
+          i = roll*16 + yaw*4 + pitch
+          if i not in [21, 31, 25, 19, 29, 23, 17, 27]:
+            ret.append(rotationangle(bacon, pitch, roll, yaw))
 
   return ret
 
@@ -61,6 +63,7 @@ def scannersWithRotations(S):
     tmp = []
     for b in s:
       tmp.append(getRotations(b))
+
     ret.append(tmp)
   
   return ret
@@ -88,7 +91,7 @@ def parseScanners(lines):
 def move(overlap, ri, ref):
   ret = []
   for p in overlap:
-    assert(len(p)==32)
+    assert(len(p)==24)
     assert(len(ref)==3)
     x = p[ri][0]-ref[0]
     y = p[ri][1]-ref[1]
@@ -113,7 +116,7 @@ def translate(points, translation):
   return ret
 
 def foundOverlap(ref, overlap):
-  assert(len(overlap[0])==32)
+  assert(len(overlap[0])==24)
   for rotindex in range(len(overlap[0])):
     rotpoints = getRotPoints(overlap, rotindex)
     for r1 in ref:
@@ -157,7 +160,7 @@ def checkParallel(input):
   return transformed, scanpos
 
 while len(NOTFOUNDS) != 0:
-  print("Still not found", NOTFOUNDS, I)
+  print("Still not found", NOTFOUNDS)
   
   PINPUT = []
   # for f in FOUNDS:
