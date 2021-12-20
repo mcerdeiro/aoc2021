@@ -83,8 +83,6 @@ def parseScanners(lines):
 def move(overlap, ri, ref):
   ret = []
   for p in overlap:
-    assert(len(p)==24)
-    assert(len(ref)==3)
     x = p[ri][0]-ref[0]
     y = p[ri][1]-ref[1]
     z = p[ri][2]-ref[2]
@@ -108,21 +106,22 @@ def translate(points, translation):
   return ret
 
 def foundOverlap(ref, overlap):
-  assert(len(overlap[0])==24)
   for rotindex in range(len(overlap[0])):
-    rotpoints = getRotPoints(overlap, rotindex)
     for r1 in ref:
-      for r2 in rotpoints:
-        offx = r2[0] - r1[0]
-        offy = r2[1] - r1[1]
-        offz = r2[2] - r1[2]
-        trans = translate(rotpoints, (offx, offy, offz))
+      for r2 in range(len(overlap)):
+        offx = overlap[r2][rotindex][0] - r1[0]
+        offy = overlap[r2][rotindex][1] - r1[1]
+        offz = overlap[r2][rotindex][2] - r1[2]
         match = 0
-        for t in trans:
-          if t in ref:
+        for t in range(len(overlap)):
+          if (overlap[t][rotindex][0]-offx, overlap[t][rotindex][1]-offy, overlap[t][rotindex][2]-offz) in ref:
             match += 1
-        if match >= 12:
-          return trans, (-offx, -offy, -offz)
+          if len(overlap)-t+match < 12:
+            break
+          if match >= 12:
+            rotpoints = getRotPoints(overlap, rotindex)
+            trans = translate(rotpoints, (offx, offy, offz))
+            return trans, (-offx, -offy, -offz)
     
   return None, None
 
@@ -146,7 +145,6 @@ def checkParallel(input):
         return None, None
 
   print("Checking", f, nf)
-  assert(f in TRANSFORMED.keys())
   transformed, scanpos = foundOverlap(TRANSFORMED[f], S[nf])
   return transformed, scanpos
 
@@ -154,7 +152,7 @@ while len(NOTFOUNDS) != 0:
   print("Still not found", NOTFOUNDS)
   
   PINPUT = []
-  PROCESSORS = 8
+  PROCESSORS = 10
   offi = 0
   offj = 0
   incf = True
@@ -185,10 +183,9 @@ while len(NOTFOUNDS) != 0:
     nf = PINPUT[i][1]
     if transformed == None:
       I.add((f,nf))
-      pass
     else:
       SPOS.append(scanpos)
-      FOUNDS.append(nf)
+      FOUNDS.insert(0, nf)
       if nf in NOTFOUNDS:
         NOTFOUNDS.remove(nf)
       oldlen = len(BOARD)
