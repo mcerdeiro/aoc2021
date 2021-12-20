@@ -9,12 +9,6 @@ from multiprocessing import Pool
 
 lines = open(sys.argv[1] if len(sys.argv) > 1 else "day19.dat", "r").read().splitlines()
 
-lines2= open("res.dat", "r").read().splitlines()
-RES = []
-for l in lines2:
-  RES.append(tuple(int(x) for x  in l.split(",")))
-
-
 def rotationangle(bacon, pitch, roll, yaw):
   cosa = [1, 0, -1, 0][yaw] # cos 0, 90, 180, 270 = 1, 0, -1, 0
   sina = [0, 1, 0, -1][yaw] # cos 0, 90, 180, 270 = 0, 1, 0, -1
@@ -73,10 +67,9 @@ def parseScanners(lines):
   tmp = []
   for line in lines:
     if "---" in line:
-      print(line)
+      pass
     elif line == "":
       S.append(tmp)
-      print("Len", len(tmp))
       tmp = []
     else:
       x,y,z = [int(x) for x in line.split(",")]
@@ -84,7 +77,6 @@ def parseScanners(lines):
   
   if len(tmp) != 0:
     S.append(tmp)
-    print("Len", len(tmp))
   
   return S
 
@@ -144,7 +136,6 @@ BOARD = getRotPoints(S[0], 0)
 TRANSFORMED = {0: getRotPoints(S[0], 0)}
 SPOS = [(0,0,0)]
 
-print("Found", FOUNDS, "notfound", NOTFOUNDS)
 I = set()
 
 def checkParallel(input):
@@ -170,8 +161,6 @@ while len(NOTFOUNDS) != 0:
   offi = 0
   offj = 0
   incf = True
-  print("FOUND", FOUNDS)
-  print("NOTFOUND", NOTFOUNDS)
   for j in range(min(len(NOTFOUNDS), PROCESSORS//2)):
     for i in range(min(len(FOUNDS), PROCESSORS//2)):
       f = FOUNDS[(i+offi) % len(FOUNDS)] 
@@ -188,7 +177,7 @@ while len(NOTFOUNDS) != 0:
       if (f, nf) not in PINPUT:
         PINPUT.append((f, nf))
   
-  print("Toprocess", PINPUT)
+  print("Following will be processed in parallel", PINPUT)
   res = []  
   with Pool(PROCESSORS) as pools:
     res = pools.map(checkParallel, PINPUT)
@@ -215,11 +204,8 @@ while len(NOTFOUNDS) != 0:
         if t not in BOARD:
           BOARD.append(t)
       TRANSFORMED[nf] = transformed.copy()
-      print("Oldlen", oldlen, "newlen", len(BOARD), len(transformed))
     
 print("Part1:", len(BOARD))
-print(SPOS)
-
 
 def manDistance(p1, p2):
   return abs(p1[0]-p2[0]) + abs(p1[1]-p2[1]) + abs(p1[2]-p2[2])
@@ -230,4 +216,4 @@ for i in range(len(SPOS)):
     if i != j:
       maxD = max(maxD, manDistance(SPOS[i], SPOS[j]))
       
-print("Part2", maxD)
+print("Part2:", maxD)
