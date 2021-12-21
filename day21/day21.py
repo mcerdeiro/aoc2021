@@ -21,7 +21,7 @@ def move(pos, moves):
   
 
 class Game:
-  def __init__(self, posplayer1, posplayer2, goal):
+  def __init__(self, posplayer1: int, posplayer2: int, goal: int):
     self.posplayer1 = posplayer1
     self.posplayer2 = posplayer2
     self.scoreplayer1 = 0
@@ -46,7 +46,7 @@ class Game:
     newgame.totalrolls = self.totalrolls
     return newgame
 
-  def move(self, count):
+  def move(self, count: int):
     if self.totalrolls % 6 < 3:
       self.posplayer1 += count
       while self.posplayer1 > 10:
@@ -72,7 +72,7 @@ class Game:
     return None
 
 
-play = Game(4,8, 1000)
+play = Game(4, 8, 1000)
 roll = 1
 for i in range(1000):
   if play.move(roll) != None:
@@ -80,11 +80,11 @@ for i in range(1000):
     break
   roll += 1
   if roll > 100:
-    roll = 1
+     roll = 1
 
 STORE = {}
 
-def playmultiuniverse(game):
+def playmultiuniverse(game: Game):
   assert(game.result == 0)
   gamestate = game.getState()
   if gamestate in STORE:
@@ -116,6 +116,6 @@ def playmultiuniverse(game):
 
 
 GOAL = 21
-myplay = Game(7,3,GOAL)
+myplay = Game(7, 3, GOAL)
 res = playmultiuniverse(myplay)
 print("Part 2:", max(res))
