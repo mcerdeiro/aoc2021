@@ -8,18 +8,6 @@ import heapq
 
 lines = open(sys.argv[1] if len(sys.argv) > 1 else "day21.dat", "r").read().splitlines()
 
-ans1 = 0 
-  
-p1 = 4
-p2 = 8
-
-def move(pos, moves):
-  res = pos + moves
-  while res > 10:
-    res -= 10
-  return res
-  
-
 class Game:
   def __init__(self, posplayer1: int, posplayer2: int, goal: int):
     self.posplayer1 = posplayer1
@@ -71,8 +59,17 @@ class Game:
       return "p2"
     return None
 
+posplayer1 = None
+posplayer2 = None
+for line in lines:
+  if "starting position: " in line:
+    if posplayer1 == None:
+      posplayer1 = int(line.split("starting position: ")[1])
+    else:
+      posplayer2 = int(line.split("starting position: ")[1])
 
-play = Game(4, 8, 1000)
+
+play = Game(posplayer1, posplayer2, 1000)
 roll = 1
 for i in range(1000):
   if play.move(roll) != None:
@@ -116,6 +113,6 @@ def playmultiuniverse(game: Game):
 
 
 GOAL = 21
-myplay = Game(7, 3, GOAL)
-res = playmultiuniverse(myplay)
+game = Game(posplayer1, posplayer2, GOAL)
+res = playmultiuniverse(game)
 print("Part 2:", max(res))
