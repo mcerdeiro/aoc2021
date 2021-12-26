@@ -7,8 +7,39 @@ debug = False
 
 lines = open(sys.argv[1] if len(sys.argv) > 1 else "day23.dat", "r").read().splitlines()
 
-def isImposibleToSolve(M2):
+def isLateralWayBlocked(fr, to, M):
+  assert(fr[1] == 1)
+  current = fr
+  dir = (current[0]-to[0])/abs(current[0]-to[0])
+  current = (current[0]+dir,current[1])
+  while M[current][0] == ".":
+    if current[0] == to[0]:
+      return True
+    current = (current[0]+dir,current[1])
   return False
+
+def isImposibleToSolve(M):
+  let = []
+  level1 = []
+  for m in M:
+    if M[m][0] in ["A", "B", "C", "D"]:
+      let.append(m)
+      if m[1] == 1:
+        level1.append(m)
+  
+  blocked = 0
+  for l1 in level1:
+    if isLateralWayBlocked(l1, getGoal(M[l1][0]), M):
+      print("blocked", l1, getGoal(M[l1][0]))
+      printMap(M, 10000000, M)
+      input()
+      blocked += 1
+
+  
+  if blocked >= 2:
+    return True
+  return False
+    
 
 def emptyWay(M, fr, to):
   moves = 0
@@ -130,6 +161,7 @@ def getPosDestinations(pos, M):
   if debug:
     print("Finding dest for", pos, M[pos])
   MOVES = []
+  MOVESTOGOAL = []
   if pos[1] in [1,2,3]:
     goal = getGoal(M[pos][0])
     if debug:
@@ -140,12 +172,14 @@ def getPosDestinations(pos, M):
       #print("Moving from to", pos, goal, "way", way)
       if way[0] != False:
         MOVES.append((goal, calcCost(M[pos][0], way[1])))
+        MOVESTOGOAL.append((goal, calcCost(M[pos][0], way[1])))
     elif M[(goal[0], goal[1]+1)][0] == M[pos][0]:
       way = emptyWay(M, pos, goal)
       if debug:
         print("Checkway", pos, goal, way)
       if way[0] != False:
         MOVES.append((goal, calcCost(M[pos][0], way[1])))
+        MOVESTOGOAL.append((goal, calcCost(M[pos][0], way[1])))
       pass
     else:
       # not possible to move since destiancion busy
@@ -188,7 +222,8 @@ def getPosDestinations(pos, M):
             break
   #else:
     #assert(0)
-    
+  if len(MOVESTOGOAL) != 0:
+    return MOVESTOGOAL
   return MOVES
 
 
@@ -277,6 +312,10 @@ def findShortToOrder():
           #input("")
           if isImposibleToSolve(M2) == False:
             heapq.heappush(ways, (newcost, unique, M2))
+          else:
+            print("Imposible map")
+            printMap(M2, 10000000, M2)
+            input()
           unique += 1
     
     next = heapq.heappop(ways)
